@@ -446,13 +446,19 @@ PRINTFUNC (picAssign)
 {
   dbuf_append_char (dbuf, '\t');
 
-  if (IC_RESULT (ic)->isaddr && IS_ITEMP (IC_RESULT (ic)))
-    dbuf_append_str (dbuf, "*(");
+  if (IC_RESULT (ic))
+    {
+      if (IC_RESULT (ic)->isaddr && IS_ITEMP (IC_RESULT (ic)))
+        dbuf_append_str (dbuf, "*(");
+    }
 
   dbuf_printOperand (IC_RESULT (ic), dbuf);
 
-  if (IC_RESULT (ic)->isaddr && IS_ITEMP (IC_RESULT (ic)))
-    dbuf_append_char (dbuf, ')');
+  if (IC_RESULT (ic))
+    {
+      if (IC_RESULT (ic)->isaddr && IS_ITEMP (IC_RESULT (ic)))
+        dbuf_append_char (dbuf, ')');
+    }
 
   dbuf_printf (dbuf, " %s ", s);
   dbuf_printOperand (IC_RIGHT (ic), dbuf);
