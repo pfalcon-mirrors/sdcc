@@ -2093,6 +2093,11 @@ eBBlockFromiCode (iCode * ic)
   if (!ic)
     return NULL;
 
+  if (options.output_icode)
+    {
+      dumpiCode(ic);
+    }
+
   eBBNum = 0;
 
   /* optimize the chain for labels & gotos

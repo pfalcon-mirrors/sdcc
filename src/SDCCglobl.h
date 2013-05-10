@@ -294,6 +294,7 @@ struct options
     int peepReturn;             /* enable peephole optimization for return instructions */
     int debug;                  /* generate extra debug info */
     int c1mode;                 /* Act like c1 - no pre-proc, asm or link */
+    int output_icode;           /* Output external representation of iCode */
     char *peep_file;            /* additional rules for peep hole */
     int nostdlib;               /* Don't use standard lib files */
     int nostdinc;               /* Don't use standard include files */
@@ -415,7 +416,8 @@ enum {
   DUMP_RANGE,
   DUMP_PACK,
   DUMP_RASSGN,
-  DUMP_LRANGE
+  DUMP_LRANGE,
+  DUMP_ICODE
 };
 
 struct _dumpFiles {

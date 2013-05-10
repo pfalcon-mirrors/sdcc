@@ -43,6 +43,7 @@ struct _dumpFiles dumpFiles[] = {
   {DUMP_PACK, ".dump10pack", NULL},
   {DUMP_RASSGN, ".dump12rassgn", NULL},
   {DUMP_LRANGE, ".dump11lrange", NULL},
+  {DUMP_ICODE, ".dumpicode", NULL},
   {0, NULL, NULL}
 };
 
@@ -152,6 +153,19 @@ closeDumpFiles ()
           fclose (dumpFilesPtr->filePtr);
         }
     }
+}
+
+/*-----------------------------------------------------------------*/
+/* dumpiCode - dump flat iCode before it's split into basic blocks */
+/*-----------------------------------------------------------------*/
+void
+dumpiCode (iCode * ic)
+{
+  FILE * of = createDumpFile (DUMP_ICODE);
+  printiCChain (ic, of);
+  /* Separate functions with empty line */
+  fprintf(of, "\n");
+  fflush (of);
 }
 
 /*-----------------------------------------------------------------*/
