@@ -365,6 +365,7 @@ extern const char *fullDstFileName; /* full name for the output file; */
 extern const char *dstFileName; /* destination file name without extension */
 extern const char *moduleName;  /* module name is source file without path and extension */
                                 /* can be NULL while linking without compiling */
+extern int input_icode;         /* Input is in iCode format */
 extern int seqPointNo;          /* current sequence point */
 extern FILE *yyin;              /* */
 extern FILE *asmFile;           /* assembly output file */
