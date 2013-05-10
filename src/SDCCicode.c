@@ -88,6 +88,7 @@ iCodeTable codeTable[] = {
   {IPOP, "pop", picGenericOne, NULL},
   {CALL, "call", picGenericOne, NULL},
   {PCALL, "pcall", picGenericOne, NULL},
+  {ICODE_DEFVAR, "defvar", picGenericOne, NULL},
   {FUNCTION, "proc", picGenericOne, NULL},
   {ENDFUNCTION, "eproc", picGenericOne, NULL},
   {RETURN, "ret", picGenericOne, NULL},
