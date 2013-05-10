@@ -442,6 +442,7 @@ PRINTFUNC (picInline)
 
 PRINTFUNC (picReceive)
 {
+  dbuf_append_char (dbuf, '\t');
   dbuf_printOperand (IC_RESULT (ic), dbuf);
   dbuf_printf (dbuf, " = %s ", s);
   dbuf_printOperand (IC_LEFT (ic), dbuf);
