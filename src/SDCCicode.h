@@ -334,6 +334,7 @@ sym_link *operandType (const operand *);
 unsigned int operandSize (operand *);
 operand *operandFromValue (value *);
 operand *operandFromSymbol (symbol *);
+operand *operandFromSymbolSimple (symbol *);
 operand *operandFromLink (sym_link *);
 sym_link *aggrToPtr (sym_link *, bool);
 int aggrToPtrDclType (sym_link *, bool);

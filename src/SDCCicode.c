@@ -1636,6 +1636,19 @@ opFromOpWithDU (operand * op, bitVect * defs, bitVect * uses)
   return nop;
 }
 
+operand *
+operandFromSymbolSimple (symbol * sym)
+{
+  operand *op;
+      op = newOperand ();
+      op->type = SYMBOL;
+      op->svt.symOperand = sym;
+      op->key = sym->key;
+      op->isvolatile = isOperandVolatile (op, TRUE);
+      op->isGlobal = isOperandGlobal (op);
+      return op;
+}
+
 /*-----------------------------------------------------------------*/
 /* operandFromSymbol - creates an operand from a symbol            */
 /*-----------------------------------------------------------------*/
