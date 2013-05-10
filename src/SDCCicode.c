@@ -513,26 +513,12 @@ void
 printiCChain (iCode * icChain, FILE * of)
 {
   iCode *loop;
-  iCodeTable *icTab;
 
   if (!of)
     of = stdout;
   for (loop = icChain; loop; loop = loop->next)
-    {
-      if ((icTab = getTableEntry (loop->op)))
-        {
-          struct dbuf_s dbuf;
-
-          fprintf (of, "%s(l%d:s%d:k%d:d%d:s%d)\t",
-                   loop->filename, loop->lineno, loop->seq, loop->key, loop->depth, loop->supportRtn);
-
-          dbuf_init (&dbuf, 1024);
-          icTab->iCodePrint (&dbuf, loop, icTab->printName);
-          dbuf_write_and_destroy (&dbuf, of);
-
-          fflush (of);
-        }
-    }
+    piCode (loop, of);
+  fflush (of);
 }
 
 
