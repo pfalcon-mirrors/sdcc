@@ -167,6 +167,7 @@ static const OPTION optionsTable[] = {
   {'S', NULL, &noAssemble, "Compile only; do not assemble or link"},
   {'c', "--compile-only", &options.cc_only, "Compile and assemble, but do not link"},
   {'E', "--preprocessonly", &preProcOnly, "Preprocess only, do not compile"},
+  {0,   "--emit-i-code", &options.output_icode, "Produce iCode as output"},
   {0,   "--c1mode", &options.c1mode, "Act in c1 mode.  The standard input is preprocessed code, the output is assembly code."},
   {'o', NULL, NULL, "Place the output into the given path resp. file"},
   {0,   OPTION_PRINT_SEARCH_DIRS, &options.printSearchDirs, "display the directories in the compiler's search path"},

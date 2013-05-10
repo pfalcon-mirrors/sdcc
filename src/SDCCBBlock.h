@@ -105,6 +105,7 @@ void replaceSymBySym (set *, operand *, operand *);
 iCode *iCodeFromeBBlock (eBBlock **, int);
 int otherPathsPresent (eBBlock **, eBBlock *);
 void replaceLabel (eBBlock *, symbol *, symbol *);
+void dumpiCode (iCode *);
 void dumpEbbsToFileExt (int, ebbIndex *);
 void dumpLiveRanges (int, hTab * liveRanges);
 void closeDumpFiles ();
