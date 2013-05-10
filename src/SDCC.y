@@ -1576,8 +1576,47 @@ abstract_declarator2
                                        DCL_ELEM($$) = (int) ulFromVal(val = constExprValue($3,TRUE));
                                        $$->next = $1;
                                     }
-   | '(' ')'                        { $$ = NULL;}
-   | '(' parameter_type_list ')'    { $$ = NULL;}
+   | '(' ')'                        {
+                                       if (!input_icode)
+                                         {
+                                            $$ = NULL; printf("here1\n");
+                                         }
+                                       else
+                                         {
+                                            $$ = newLink (DECLARATOR);
+                                            DCL_TYPE($$) = FUNCTION;
+                                         }
+                                    }
+   | '('
+        {
+          if (input_icode)
+            {
+              NestLevel++;
+              STACK_PUSH(blockNum, currBlockno);
+              btree_add_child(currBlockno, ++blockNo);
+              currBlockno = blockNo;
+            }
+        }
+     parameter_type_list ')'
+        {
+          if (!input_icode)
+            {
+              $$ = NULL; printf("here2\n");
+            }
+          else
+            {
+              sym_link *p = newLink(DECLARATOR);
+              DCL_TYPE(p) = FUNCTION;
+
+              FUNC_HASVARARGS(p) = IS_VARG($3);
+              FUNC_ARGS(p) = reverseVal($3);
+
+              /* nest level was incremented to take care of the parms  */
+              NestLevel--;
+              currBlockno = STACK_POP(blockNum);
+              $$ = p;
+            }
+        }
    | abstract_declarator2 '(' ')' {
      // $1 must be a pointer to a function
      sym_link *p=newLink(DECLARATOR);
