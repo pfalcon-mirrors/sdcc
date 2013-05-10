@@ -212,6 +212,7 @@ icode_proc
         {
           iCode *ic;
           currFunc = OP_SYMBOL($2);
+          allocVariables (OP_SYMBOL($2));
           ic = newiCode (FUNCTION, $2, NULL);
           ADDTOCHAIN (ic);
           PICC(ic);
@@ -225,6 +226,7 @@ icode_endproc
           ic = newiCode (ENDFUNCTION, $2, NULL);
           ADDTOCHAIN (ic);
           PICC(ic);
+          FUNC_HASBODY (OP_SYMBOL($2)->type) = 1;
           printf("------------\n");
           all = reverseiCChain ();
           PICC(all);
