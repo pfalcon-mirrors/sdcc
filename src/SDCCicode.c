@@ -567,7 +567,6 @@ void
 printiCChain (iCode * icChain, FILE * of)
 {
   iCode *loop;
-  iCodeTable *icTab;
 
   if (!of)
     of = stdout;
