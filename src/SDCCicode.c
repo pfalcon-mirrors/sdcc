@@ -179,8 +179,11 @@ dbuf_printOperand (operand * op, struct dbuf_s *dbuf)
 //#if REGA      /* { */
       if (REGA && !getenv ("PRINT_SHORT_OPERANDS"))
         {
-          dbuf_printf (dbuf, "%s",
-                       (OP_SYMBOL (op)->rname[0] ? OP_SYMBOL (op)->rname : OP_SYMBOL (op)->name));
+          if (dumpiCodeExternalRepr)
+            dbuf_printf (dbuf, "%s", OP_SYMBOL (op)->name);
+          else
+            dbuf_printf (dbuf, "%s",
+                         (OP_SYMBOL (op)->rname[0] ? OP_SYMBOL (op)->rname : OP_SYMBOL (op)->name));
           if (!dumpiCodeExternalRepr)
             {
               dbuf_printf (dbuf, " [k%d lr%d:%d so:%d]",
