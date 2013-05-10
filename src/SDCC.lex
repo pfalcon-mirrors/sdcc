@@ -74,6 +74,19 @@ static void checkCurrFile (const char *s);
 
 %x asm
 %%
+%{
+    /* Allow to start parsing from a dynamic non-terminal symbol. Based on
+       http://www.gnu.org/software/bison/manual/html_node/Multiple-start_002dsymbols.html */
+    extern int start_token;
+    if (start_token)
+         {
+           int t = start_token;
+           start_token = 0;
+           return t;
+         }
+%}
+
+
 "__asm"                {
   count ();
   if (asmbuff.buf == NULL)
