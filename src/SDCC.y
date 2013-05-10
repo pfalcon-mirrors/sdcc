@@ -198,6 +198,7 @@ icode_proc
    : ICODE_PROC icode_typed_value
         {
           iCode *ic;
+          currFunc = OP_SYMBOL($2);
           ic = newiCode (FUNCTION, $2, NULL);
           ADDTOCHAIN (ic);
           PICC(ic);
@@ -281,8 +282,7 @@ icode_typed_const
 icode_typed_ident
    : icode_identifier '{' type_name icode_storage_class icode_addr_space '}'
         {
-//          strncpyz ($3->name, $1->name, sizeof ($3->name));
-          strncpyz ($1->rname, $1->name, SDCC_NAME_MAX);
+          SNPRINTF ($1->rname, sizeof ($1->rname), "_%s", $1->name);
           // TODO: use setOperandType ?
           $1->type = $3;
           $1->etype = getSpec ($1->type);
