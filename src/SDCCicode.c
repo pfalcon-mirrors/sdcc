@@ -40,6 +40,7 @@ int lineno = 1;                 /* current line number */
 int block;
 int scopeLevel;
 int seqPoint;
+int dumpiCodeExternalRepr;
 
 symbol *returnLabel;            /* function return label */
 symbol *entryLabel;             /* function entry  label */
@@ -178,13 +179,58 @@ dbuf_printOperand (operand * op, struct dbuf_s *dbuf)
 //#if REGA      /* { */
       if (REGA && !getenv ("PRINT_SHORT_OPERANDS"))
         {
-          dbuf_printf (dbuf, "%s [k%d lr%d:%d so:%d]{ ia%d a2p%d re%d rm%d nos%d ru%d dp%d}",   /*{ar%d rm%d ru%d p%d a%d u%d i%d au%d k%d ks%d}"  , */
-                       (OP_SYMBOL (op)->rname[0] ? OP_SYMBOL (op)->rname : OP_SYMBOL (op)->name),
+          dbuf_printf (dbuf, "%s",
+                       (OP_SYMBOL (op)->rname[0] ? OP_SYMBOL (op)->rname : OP_SYMBOL (op)->name));
+          if (!dumpiCodeExternalRepr)
+            {
+              dbuf_printf (dbuf, " [k%d lr%d:%d so:%d]",
                        op->key,
                        OP_LIVEFROM (op), OP_LIVETO (op),
-                       OP_SYMBOL (op)->stack,
-                       op->isaddr, op->aggr2ptr, OP_SYMBOL (op)->isreqv,
-                       OP_SYMBOL (op)->remat, OP_SYMBOL (op)->noSpilLoc, OP_SYMBOL (op)->ruonly, OP_SYMBOL (op)->dptr);
+                       OP_SYMBOL (op)->stack);
+            }
+
+            {
+              #define PRINT_BEGIN(ch) \
+                { \
+                  char start_ch = ch;
+              #define SEP() \
+                    if (start_ch) { dbuf_append_char (dbuf, start_ch); start_ch = 0; } \
+                    else { dbuf_append_char (dbuf, ' '); }
+              #define PRINT_FLAG(val, str) \
+                if (val) \
+                  { \
+                    SEP(); \
+                    dbuf_append_str (dbuf, str); \
+                  }
+              #define PRINT_VAL(val, printf_pat) \
+                if (val) \
+                  { \
+                    SEP(); \
+                    dbuf_printf (dbuf, printf_pat, val); \
+                  }
+              #define PRINT_END(ch) \
+                  if (!start_ch) dbuf_append_char (dbuf, ch); \
+                }
+
+              PRINT_BEGIN('<');
+              PRINT_FLAG(op->isaddr, "addr");
+              PRINT_FLAG(op->isvolatile, "vol");
+              PRINT_VAL(op->aggr2ptr, "aggptr%d");
+              PRINT_FLAG(op->isGlobal, "glb");
+              PRINT_FLAG(op->isPtr, "ptr");
+              PRINT_FLAG(op->isGptr, "gptr");
+              PRINT_FLAG(op->isParm, "parm");
+              PRINT_FLAG(op->isLiteral, "lit");
+              PRINT_FLAG(OP_SYMBOL (op)->isitmp, "tmp");
+              //PRINT_FLAG(OP_SYMBOL (op)->isref, "ref");
+              PRINT_FLAG(OP_SYMBOL (op)->isreqv, "regcache");
+              PRINT_FLAG(OP_SYMBOL (op)->remat, "remat");
+              PRINT_FLAG(OP_SYMBOL (op)->noSpilLoc, "nospill");
+              PRINT_FLAG(OP_SYMBOL (op)->ruonly, "retonly");
+              PRINT_VAL(OP_SYMBOL (op)->dptr, "dptr%d");
+              PRINT_END('>');
+            }
+
           {
             dbuf_append_char (dbuf, '{');
             dbuf_printTypeChain (operandType (op), dbuf);
@@ -409,7 +455,10 @@ PRINTFUNC (picAssign)
 
 PRINTFUNC (picLabel)
 {
-  dbuf_printf (dbuf, " %s($%d) :\n", IC_LABEL (ic)->name, IC_LABEL (ic)->key);
+  if (dumpiCodeExternalRepr)
+    dbuf_printf (dbuf, "%s:\n", IC_LABEL (ic)->name);
+  else
+    dbuf_printf (dbuf, " %s($%d) :\n", IC_LABEL (ic)->name, IC_LABEL (ic)->key);
 }
 
 PRINTFUNC (picGoto)
@@ -493,7 +542,8 @@ piCode (void *item, FILE * of)
     of = stdout;
 
   icTab = getTableEntry (ic->op);
-  fprintf (of, "%s(%d:%d:%d:%d:%d)\t", ic->filename, ic->lineno, ic->seq, ic->key, ic->depth, ic->supportRtn);
+  if (!dumpiCodeExternalRepr)
+    fprintf (of, "%s(%d:%d:%d:%d:%d)\t", ic->filename, ic->lineno, ic->seq, ic->key, ic->depth, ic->supportRtn);
   dbuf_init (&dbuf, 1024);
   icTab->iCodePrint (&dbuf, ic, icTab->printName);
   dbuf_write_and_destroy (&dbuf, of);
