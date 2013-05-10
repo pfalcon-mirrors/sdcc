@@ -14,7 +14,8 @@ struct eBBlock;
 typedef struct memmap
   {
     unsigned char pageno;       /* page no for this variable   */
-    const char *sname;          /* character prefix for map    */
+    const char *sname;          /* port-dependent segment name for map */
+    const char *name;           /* port-independent map name   */
     char dbName;                /* debugger address space name */
     int ptrType;                /* pointer Type for this space */
     int slbl;                   /* label counter for space     */
@@ -33,7 +34,7 @@ memmap;
 /* For performance we might want to use a hash map instead of the linked list */
 typedef struct namedspacemap
   {
-    char *name;
+    const char *name;
     memmap *map;
     struct namedspacemap *next;
   }
@@ -89,7 +90,10 @@ extern memmap *overlay;                /* the overlay segment          */
 extern memmap *eeprom;                 /* eeprom space                 */
 extern memmap *home;                   /* Non-banked home space        */
 
+/* Custom banking maps are on this list */
 extern namedspacemap *namedspacemaps;
+/* All maps are on this list, names are not specific to ports */
+extern namedspacemap *allspacemaps;
 
 extern int fatalError;
 
@@ -107,7 +111,8 @@ extern struct set *ovrSetSets;
                                      : port->unqualified_pointer)
 
 /* forward decls for functions    */
-memmap *allocMap (char, char, char, char, char, char, unsigned, const char *, char, int);
+memmap *allocMap (char, char, char, char, char, char, unsigned, const char *, char, const char *, int);
+memmap *getMapByName (const char *);
 void initMem ();
 bool defaultOClass (struct symbol *);
 void allocGlobal (struct symbol *);

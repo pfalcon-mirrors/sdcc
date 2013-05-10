@@ -52,6 +52,7 @@ memmap *overlay = NULL;         /* overlay segment             */
 memmap *eeprom = NULL;          /* eeprom location             */
 memmap *home = NULL;            /* Unswitchable code bank      */
 namedspacemap *namedspacemaps = 0; /* memory segments for named address spaces */
+namedspacemap *allspacemaps = 0; /* memory segments for named address spaces */
 
 /* this is a set of sets each set containing
    symbols in a single overlay */
@@ -70,8 +71,10 @@ allocMap (char rspace,          /* sfr space                   */
           char bitaddr,         /* bit addressable space       */
           char codemap,         /* this is code space          */
           unsigned sloc,        /* starting location           */
-          const char *name,     /* 8 character name            */
+          const char *name,     /* port-dependent name         */
           char dbName,          /* debug name                  */
+                      /* human-readable, port-independent name */
+          const char *displayName,
           int ptrType           /* pointer type for this space */
 )
 {
@@ -95,9 +98,17 @@ allocMap (char rspace,          /* sfr space                   */
   map->codesp = codemap;
   map->sloc = sloc;
   map->sname = name;
+  map->name = displayName;
   map->dbName = dbName;
   map->ptrType = ptrType;
   map->syms = NULL;
+
+  /* Record address space in allspacemaps list */
+  namedspacemap * nm = Safe_alloc (sizeof (namedspacemap));
+  nm->name = displayName;
+  nm->map = map;
+  nm->next = allspacemaps;
+  allspacemaps = nm;
 
   dbuf_init(&map->oBuf, 4096);
 
@@ -121,7 +132,7 @@ initMem ()
      DEBUG-NAME     -   'A'
      POINTER-TYPE   -   FPOINTER
    */
-  xstack = allocMap (0, 1, 1, 0, 0, 0, options.xstack_loc, XSTACK_NAME, 'A', PPOINTER);
+  xstack = allocMap (0, 1, 1, 0, 0, 0, options.xstack_loc, XSTACK_NAME, 'A', "xstack", PPOINTER);
 
   /* internal stack segment ;
      SFRSPACE       -   NO
@@ -133,7 +144,7 @@ initMem ()
      DEBUG-NAME     -   'B'
      POINTER-TYPE   -   POINTER
    */
-  istack = allocMap (0, 0, 0, 0, 0, 0, options.stack_loc, ISTACK_NAME, 'B', POINTER);
+  istack = allocMap (0, 0, 0, 0, 0, 0, options.stack_loc, ISTACK_NAME, 'B', "istack", POINTER);
 
   /* code  segment ;
      SFRSPACE       -   NO
@@ -145,7 +156,7 @@ initMem ()
      DEBUG-NAME     -   'C'
      POINTER-TYPE   -   CPOINTER
    */
-  code = allocMap (0, 1, 0, 0, 0, 1, options.code_loc, CODE_NAME, 'C', CPOINTER);
+  code = allocMap (0, 1, 0, 0, 0, 1, options.code_loc, CODE_NAME, 'C', "code", CPOINTER);
 
   /* home  segment ;
      SFRSPACE       -   NO
@@ -157,7 +168,7 @@ initMem ()
      DEBUG-NAME     -   'C'
      POINTER-TYPE   -   CPOINTER
    */
-  home = allocMap (0, 1, 0, 0, 0, 1, options.code_loc, HOME_NAME, 'C', CPOINTER);
+  home = allocMap (0, 1, 0, 0, 0, 1, options.code_loc, HOME_NAME, 'C', "home", CPOINTER);
 
   /* Static segment (code for variables );
      SFRSPACE       -   NO
@@ -169,7 +180,7 @@ initMem ()
      DEBUG-NAME     -   'D'
      POINTER-TYPE   -   CPOINTER
    */
-  statsg = allocMap (0, 1, 0, 0, 0, 1, 0, STATIC_NAME, 'D', CPOINTER);
+  statsg = allocMap (0, 1, 0, 0, 0, 1, 0, STATIC_NAME, 'D', "statsg", CPOINTER);
 
   /* Constant Absolute Data segment (for variables );
      SFRSPACE       -   NO
@@ -181,7 +192,7 @@ initMem ()
      DEBUG-NAME     -   'D'
      POINTER-TYPE   -   CPOINTER
    */
-  c_abs = allocMap (0, 1, 0, 0, 0, 1, 0, CABS_NAME, 'D', CPOINTER);
+  c_abs = allocMap (0, 1, 0, 0, 0, 1, 0, CABS_NAME, 'D', "c_abs", CPOINTER);
 
   /* Data segment - internal storage segment ;
      SFRSPACE       -   NO
@@ -193,10 +204,10 @@ initMem ()
      DEBUG-NAME     -   'E'
      POINTER-TYPE   -   POINTER
    */
-  data = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, DATA_NAME, 'E', POINTER);
+  data = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, DATA_NAME, 'E', "data", POINTER);
 
-  initialized = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, INITIALIZED_NAME, 'E', POINTER);
-  initializer = allocMap (0, 0, 0, 1, 0, 1, options.code_loc, INITIALIZER_NAME, 'C', CPOINTER);
+  initialized = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, INITIALIZED_NAME, 'E', "initialized", POINTER);
+  initializer = allocMap (0, 0, 0, 1, 0, 1, options.code_loc, INITIALIZER_NAME, 'C', "initializer", CPOINTER);
 
   /* Absolute internal storage segment ;
      SFRSPACE       -   NO
@@ -208,7 +219,7 @@ initMem ()
      DEBUG-NAME     -   'E'
      POINTER-TYPE   -   POINTER
    */
-  d_abs = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, IABS_NAME, 'E', POINTER);
+  d_abs = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, IABS_NAME, 'E', "d_abs", POINTER);
 
   /* overlay segment - same as internal storage segment ;
      SFRSPACE       -   NO
@@ -221,7 +232,7 @@ initMem ()
      POINTER-TYPE   -   POINTER
    */
   if (OVERLAY_NAME)
-      overlay = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, DATA_NAME, 'E', POINTER);
+      overlay = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, DATA_NAME, 'E', "overlay", POINTER);
 
   /* Xternal paged segment ;   
      SFRSPACE       -   NO
@@ -233,7 +244,7 @@ initMem ()
      DEBUG-NAME     -   'P'
      POINTER-TYPE   -   PPOINTER
    */
-  pdata = allocMap (0, 0, 1, 0, 0, 0, options.xstack_loc, PDATA_NAME, 'P', PPOINTER);
+  pdata = allocMap (0, 0, 1, 0, 0, 0, options.xstack_loc, PDATA_NAME, 'P', "pdata", PPOINTER);
 
   /* Xternal Data segment -
      SFRSPACE       -   NO
@@ -245,9 +256,9 @@ initMem ()
      DEBUG-NAME     -   'F'
      POINTER-TYPE   -   FPOINTER
    */
-  xdata = allocMap (0, 1, 0, 0, 0, 0, options.xdata_loc, XDATA_NAME, 'F', FPOINTER);
-  xidata = allocMap (0, 1, 0, 0, 0, 0, 0, XIDATA_NAME, 'F', FPOINTER);
-  xinit = allocMap (0, 1, 0, 0, 0, 1, 0, XINIT_NAME, 'C', CPOINTER);
+  xdata = allocMap (0, 1, 0, 0, 0, 0, options.xdata_loc, XDATA_NAME, 'F', "xdata", FPOINTER);
+  xidata = allocMap (0, 1, 0, 0, 0, 0, 0, XIDATA_NAME, 'F', "xidata", FPOINTER);
+  xinit = allocMap (0, 1, 0, 0, 0, 1, 0, XINIT_NAME, 'C', "xinit", CPOINTER);
 
   /* Absolute external storage segment ;
      SFRSPACE       -   NO
@@ -259,7 +270,7 @@ initMem ()
      DEBUG-NAME     -   'F'
      POINTER-TYPE   -   FPOINTER
    */
-  x_abs = allocMap (0, 1, 0, 0, 0, 0, options.xdata_loc, XABS_NAME, 'F', FPOINTER);
+  x_abs = allocMap (0, 1, 0, 0, 0, 0, options.xdata_loc, XABS_NAME, 'F', "x_abs", FPOINTER);
 
   /* Indirectly addressed internal data segment
      SFRSPACE       -   NO
@@ -271,7 +282,7 @@ initMem ()
      DEBUG-NAME     -   'G'
      POINTER-TYPE   -   IPOINTER
    */
-  idata = allocMap (0, 0, 0, 0, 0, 0, options.idata_loc, IDATA_NAME, 'G', IPOINTER);
+  idata = allocMap (0, 0, 0, 0, 0, 0, options.idata_loc, IDATA_NAME, 'G', "idata", IPOINTER);
 
   /* Indirectly addressed absolute internal segment
      SFRSPACE       -   NO
@@ -283,7 +294,7 @@ initMem ()
      DEBUG-NAME     -   'E'
      POINTER-TYPE   -   IPOINTER
    */
-  i_abs = allocMap (0, 0, 0, 0, 0, 0, options.data_loc, IABS_NAME, 'E', IPOINTER);
+  i_abs = allocMap (0, 0, 0, 0, 0, 0, options.data_loc, IABS_NAME, 'E', "i_abs", IPOINTER);
 
   /* Bit space ;
      SFRSPACE       -   NO
@@ -295,7 +306,7 @@ initMem ()
      DEBUG-NAME     -   'H'
      POINTER-TYPE   -  _NONE_
    */
-  bit = allocMap (0, 0, 0, 1, 1, 0, 0, BIT_NAME, 'H', 0);
+  bit = allocMap (0, 0, 0, 1, 1, 0, 0, BIT_NAME, 'H', "bit", 0);
 
   /* Special function register space :-
      SFRSPACE       -   YES
@@ -307,7 +318,7 @@ initMem ()
      DEBUG-NAME     -   'I'
      POINTER-TYPE   -   _NONE_
    */
-  sfr = allocMap (1, 0, 0, 1, 0, 0, 0, REG_NAME, 'I', 0);
+  sfr = allocMap (1, 0, 0, 1, 0, 0, 0, REG_NAME, 'I', "sfr", 0);
 
   /* Register space ;
      SFRSPACE       -   YES
@@ -319,7 +330,7 @@ initMem ()
      DEBUG-NAME     -   ' '
      POINTER-TYPE   -   _NONE_
    */
-  reg = allocMap (1, 0, 0, 0, 0, 0, 0, REG_NAME, ' ', 0);
+  reg = allocMap (1, 0, 0, 0, 0, 0, 0, REG_NAME, ' ', "reg", 0);
 
   /* SFR bit space
      SFRSPACE       -   YES
@@ -331,7 +342,7 @@ initMem ()
      DEBUG-NAME     -   'J'
      POINTER-TYPE   -   _NONE_
    */
-  sfrbit = allocMap (1, 0, 0, 1, 1, 0, 0, REG_NAME, 'J', 0);
+  sfrbit = allocMap (1, 0, 0, 1, 1, 0, 0, REG_NAME, 'J', "sfrbit", 0);
 
   /* EEPROM space
      SFRSPACE       -   NO
@@ -343,11 +354,23 @@ initMem ()
      DEBUG-NAME     -   'K'
      POINTER-TYPE   -   EEPPOINTER
    */
-  eeprom = allocMap (0, 1, 0, 0, 0, 0, 0, REG_NAME, 'K', EEPPOINTER);
+  eeprom = allocMap (0, 1, 0, 0, 0, 0, 0, REG_NAME, 'K', "eeprom", EEPPOINTER);
 
   /* the unknown map */
-  generic = allocMap (1, 0, 0, 1, 1, 0, 0, REG_NAME, ' ', GPOINTER);
+  generic = allocMap (1, 0, 0, 1, 1, 0, 0, REG_NAME, ' ', "generic", GPOINTER);
 
+}
+
+memmap *
+getMapByName (const char *name)
+{
+      namedspacemap *nm;
+      for (nm = allspacemaps; nm; nm = nm->next)
+      {
+        if (!strcmp (nm->name, name))
+          return nm->map;
+      }
+      return NULL;
 }
 
 /*-----------------------------------------------------------------*/
@@ -369,8 +392,9 @@ allocIntoSeg (symbol *sym)
         {
           nm = Safe_alloc (sizeof (namedspacemap));
           nm->name = Safe_alloc (strlen(SPEC_ADDRSPACE (sym->etype)->name) + 1);
-          strcpy (nm->name, SPEC_ADDRSPACE (sym->etype)->name);
-          nm->map = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, SPEC_ADDRSPACE (sym->etype)->name, 'E', POINTER);
+          strcpy ((char *)nm->name, SPEC_ADDRSPACE (sym->etype)->name);
+          nm->map = allocMap (0, 0, 0, 1, 0, 0, options.data_loc, SPEC_ADDRSPACE (sym->etype)->name, 'E',
+                                                                  SPEC_ADDRSPACE (sym->etype)->name, POINTER);
           nm->next = namedspacemaps;
           namedspacemaps = nm;
         }
