@@ -32,6 +32,7 @@ extern symbol *entryLabel;
 extern int iCodeKey;
 extern int operandKey;
 extern set *iCodeChain;
+extern set *iCodeDataChain;
 /* If true, iCode printing functions will output external
    representation of iCode, which later can be fed back into
    sdcc. If false, debugging representation for iCode will be
@@ -308,6 +309,7 @@ iCodeTable;
 /* forward references for functions                                */
 /*-----------------------------------------------------------------*/
 iCode *reverseiCChain ();
+iCode *_reverseiCChain (set **);
 bool isOperandOnStack (operand *);
 int isOperandVolatile (const operand *, bool);
 int isOperandGlobal (const operand *);
