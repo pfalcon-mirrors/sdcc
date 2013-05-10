@@ -3359,7 +3359,7 @@ dbuf_printTypeChain (sym_link * start, struct dbuf_s *dbuf)
           switch (DCL_TYPE (type))
             {
             case FUNCTION:
-              dbuf_printf (dbuf, "function %s%s",
+              dbuf_printf (dbuf, "%s%s",
                            (IFFUNC_ISBUILTIN (type) ? "__builtin__ " : ""),
                            (IFFUNC_ISJAVANATIVE (type) ? "_JavaNative " : ""));
               dbuf_append_str (dbuf, "( ");
