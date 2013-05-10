@@ -104,6 +104,9 @@ bool uselessDecl = TRUE;
 %token CAST CALL PARAM NULLOP BLOCK LABEL RECEIVE SEND ARRAYINIT
 %token DUMMY_READ_VOLATILE ENDCRITICAL SWAP INLINE NORETURN RESTRICT SMALLC ALIGNAS
 %token ASM
+/* Grammar type dispatch tokens */
+%token PARSE_C PARSE_ICODE
+
 
 %type <yyint> Interrupt_storage
 %type <sym> identifier declarator declarator2 declarator3 enumerator_list enumerator
@@ -135,9 +138,25 @@ bool uselessDecl = TRUE;
 %type <yyint> unary_operator assignment_operator struct_or_union
 %type <yystr> asm_string_literal
 
-%start file
+%start file_type_dispatch
 
 %%
+
+file_type_dispatch
+   : PARSE_C file
+   | PARSE_ICODE icode_program
+   ;
+
+/*
+ *  iCode Grammar
+ */
+icode_program
+   :
+   ;
+
+/*
+ *  C Grammar
+ */
 
 file
    : /* empty */

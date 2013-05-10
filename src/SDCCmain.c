@@ -56,6 +56,7 @@ const char *dstFileName;        /* destination file name without extension */
 const char *moduleName;         /* module name is same as module name base, but with all */
                                 /* non-alphanumeric characters replaced with underscore */
 int input_icode;
+int start_token = PARSE_C;
 int currRegBank = 0;
 int RegBankUsed[4] = { 1, 0, 0, 0 };    /*JCF: Reg Bank 0 used by default */
 
@@ -2553,6 +2554,9 @@ main (int argc, char **argv, char **envp)
 
       if (options.verbose)
         printf ("sdcc: Generating code...\n");
+
+      if (input_icode)
+          start_token = PARSE_ICODE;
 
       yyparse ();
 
