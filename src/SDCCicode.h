@@ -353,6 +353,7 @@ operand *newiTempOperand (sym_link *, char);
 operand *newiTempFromOp (operand *);
 iCode *getBuiltinParms (iCode *, int *, operand **);
 int isiCodeInFunctionCall (iCode *);
+symbol *getiCodeSym (bucket **, symbol *, char *);
 /*-----------------------------------------------------------------*/
 /* declaration of exported variables                               */
 /*-----------------------------------------------------------------*/
