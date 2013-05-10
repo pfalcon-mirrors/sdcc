@@ -2095,7 +2095,9 @@ eBBlockFromiCode (iCode * ic)
 
   if (options.output_icode)
     {
+      dumpiCodeExternalRepr = 1;
       dumpiCode(ic);
+      dumpiCodeExternalRepr = 0;
     }
 
   eBBNum = 0;

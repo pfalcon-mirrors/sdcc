@@ -31,6 +31,11 @@ extern symbol *returnLabel;
 extern symbol *entryLabel;
 extern int iCodeKey;
 extern int operandKey;
+/* If true, iCode printing functions will output external
+   representation of iCode, which later can be fed back into
+   sdcc. If false, debugging representation for iCode will be
+   used, which is detailed and verbose. */
+extern int dumpiCodeExternalRepr;
 
 enum
 {
