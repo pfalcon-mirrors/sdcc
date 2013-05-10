@@ -31,6 +31,7 @@ extern symbol *returnLabel;
 extern symbol *entryLabel;
 extern int iCodeKey;
 extern int operandKey;
+extern set *iCodeChain;
 /* If true, iCode printing functions will output external
    representation of iCode, which later can be fed back into
    sdcc. If false, debugging representation for iCode will be
@@ -313,6 +314,8 @@ int isOperandGlobal (const operand *);
 void printiCChain (iCode *, FILE *);
 operand *ast2iCode (ast *, int);
 operand *geniCodePtrPtrSubtract (operand *, operand *);
+void geniCodeLabel (symbol *);
+void geniCodeReturn (operand *);
 void initiCode ();
 iCode *iCodeFromAst (ast *);
 int isiCodeEqual (iCode *, iCode *);
@@ -340,6 +343,7 @@ sym_link *aggrToPtr (sym_link *, bool);
 int aggrToPtrDclType (sym_link *, bool);
 void setOClass (sym_link * ptr, sym_link * spec);
 int piCode (void *, FILE *);
+void PICC (iCode *);
 int dbuf_printOperand (operand *, struct dbuf_s *);
 int printOperand (operand *, FILE *);
 void setOperandType (operand *, sym_link *);
