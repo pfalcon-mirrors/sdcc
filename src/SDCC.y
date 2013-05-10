@@ -37,6 +37,7 @@
 #include "SDCCutil.h"
 #include "SDCCbtree.h"
 #include "SDCCopt.h"
+#include "common.h"
 
 extern int yyerror (char *);
 extern FILE     *yyin;
@@ -80,6 +81,7 @@ bool uselessDecl = TRUE;
     designation*dsgn;       /* designator                             */
     const char *yystr;      /* pointer to dynamicaly allocated string */
     ast        *asts;       /* expression tree                        */
+    operand    *oper;       /* iCode operand                          */
 }
 
 %token <yychar> IDENTIFIER TYPE_NAME ADDRSPACE_NAME
