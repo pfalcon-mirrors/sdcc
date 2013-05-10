@@ -221,12 +221,12 @@ dbuf_printOperand (operand * op, struct dbuf_s *dbuf)
               PRINT_FLAG(op->isaddr, "addr");
               PRINT_FLAG(op->isvolatile, "vol");
               PRINT_VAL(op->aggr2ptr, "aggptr%d");
-              PRINT_FLAG(op->isGlobal, "glb");
+              //PRINT_FLAG(op->isGlobal, "glb");
               PRINT_FLAG(op->isPtr, "ptr");
               PRINT_FLAG(op->isGptr, "gptr");
               PRINT_FLAG(op->isParm, "parm");
               PRINT_FLAG(op->isLiteral, "lit");
-              PRINT_FLAG(OP_SYMBOL (op)->isitmp, "tmp");
+              //PRINT_FLAG(OP_SYMBOL (op)->isitmp, "tmp");
               //PRINT_FLAG(OP_SYMBOL (op)->isref, "ref");
               PRINT_FLAG(OP_SYMBOL (op)->isreqv, "regcache");
               PRINT_FLAG(OP_SYMBOL (op)->remat, "remat");
