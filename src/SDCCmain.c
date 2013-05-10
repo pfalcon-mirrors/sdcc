@@ -55,6 +55,7 @@ const char *fullDstFileName;    /* full name for the output file; */
 const char *dstFileName;        /* destination file name without extension */
 const char *moduleName;         /* module name is same as module name base, but with all */
                                 /* non-alphanumeric characters replaced with underscore */
+int input_icode;
 int currRegBank = 0;
 int RegBankUsed[4] = { 1, 0, 0, 0 };    /*JCF: Reg Bank 0 used by default */
 
@@ -630,6 +631,7 @@ processFile (char *s)
   const char *extp;
   struct dbuf_s ext;
   struct dbuf_s path;
+  int is_icode;
 
   dbuf_init (&ext, 128);
   dbuf_init (&path, PATH_MAX);
@@ -649,7 +651,8 @@ processFile (char *s)
 
   /* otherwise depending on the file type */
   extp = dbuf_c_str (&ext);
-  if (STRCASECMP (extp, ".c") == 0)
+  is_icode = STRCASECMP (extp, ".icode") == 0;
+  if (is_icode || STRCASECMP (extp, ".c") == 0)
     {
       char *p, *m;
 
@@ -691,6 +694,10 @@ processFile (char *s)
         if (!isalnum ((unsigned char) *p))
           *p = '_';
       moduleName = m;
+
+      if (is_icode)
+          input_icode = 1;
+
       return;
     }
 
