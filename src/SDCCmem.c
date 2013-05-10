@@ -411,7 +411,7 @@ allocIntoSeg (symbol *sym)
     {
       operand *op = operandFromSymbolSimple(sym);
       iCode *ic = newiCode (ICODE_DEFVAR, op, NULL);
-      ADDTOCHAIN (ic);
+      addSetHead(&iCodeDataChain, ic);
     }
 }
 

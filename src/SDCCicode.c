@@ -31,6 +31,7 @@
 /* global variables       */
 
 set *iCodeChain = NULL;
+set *iCodeDataChain = NULL;
 int iTempNum = 0;
 int iTempLblNum = 0;
 int operandKey = 0;
@@ -4546,12 +4547,12 @@ ast2iCode (ast * tree, int lvl)
 /* reverseICChain - gets from the list and creates a linkedlist    */
 /*-----------------------------------------------------------------*/
 iCode *
-reverseiCChain ()
+_reverseiCChain (set **s)
 {
   iCode *loop = NULL;
   iCode *prev = NULL;
 
-  while ((loop = getSet (&iCodeChain)))
+  while ((loop = getSet (s)))
     {
       loop->next = prev;
       if (prev)
@@ -4562,6 +4563,11 @@ reverseiCChain ()
   return prev;
 }
 
+iCode *
+reverseiCChain ()
+{
+  return _reverseiCChain(&iCodeChain);
+}
 
 /*-----------------------------------------------------------------*/
 /* iCodeFromAst - given an ast will convert it to iCode            */

@@ -2096,6 +2096,7 @@ eBBlockFromiCode (iCode * ic)
   if (options.output_icode)
     {
       dumpiCodeExternalRepr = 1;
+      dumpiCode(_reverseiCChain (&iCodeDataChain));
       dumpiCode(ic);
       dumpiCodeExternalRepr = 0;
     }
