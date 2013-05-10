@@ -234,6 +234,10 @@ dbuf_printOperand (operand * op, struct dbuf_s *dbuf)
           {
             dbuf_append_char (dbuf, '{');
             dbuf_printTypeChain (operandType (op), dbuf);
+
+            memmap *map = SPEC_OCLS (getSpec (operandType (op)));
+            dbuf_printf (dbuf, " as=%s", map->name);
+
             if (SPIL_LOC (op) && IS_ITEMP (op))
               dbuf_printf (dbuf, "}{ sir@ %s", SPIL_LOC (op)->rname);
             dbuf_append_char (dbuf, '}');
