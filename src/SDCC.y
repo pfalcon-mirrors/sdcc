@@ -111,6 +111,7 @@ bool uselessDecl = TRUE;
 
 // iCode statements
 %token ICODE_PROC ICODE_EPROC ICODE_RET
+%token ICODE_DEFVAR
 // iCode storage classes
 %token ICODE_FIXED ICODE_DATA ICODE_XDATA ICODE_LITERAL ICODE_ADDRSPACE
 
@@ -162,8 +163,20 @@ file_type_dispatch
  */
 
 icode_program
-   : icode_program icode_func
+   : icode_program icode_toplevel
    |
+   ;
+
+icode_toplevel
+   : icode_func
+   | icode_var
+   ;
+
+icode_var
+   : ICODE_DEFVAR icode_typed_ident
+        {
+          allocVariables (OP_SYMBOL($2));
+        }
    ;
 
 icode_func

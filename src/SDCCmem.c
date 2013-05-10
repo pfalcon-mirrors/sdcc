@@ -407,6 +407,12 @@ allocIntoSeg (symbol *sym)
   addSet (&segment->syms, sym);
   if (segment == pdata)
     sym->iaccess = 1;
+  if (!segment->codesp)
+    {
+      operand *op = operandFromSymbolSimple(sym);
+      iCode *ic = newiCode (ICODE_DEFVAR, op, NULL);
+      ADDTOCHAIN (ic);
+    }
 }
 
 /*-----------------------------------------------------------------*/

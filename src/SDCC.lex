@@ -188,6 +188,7 @@ static void checkCurrFile (const char *s);
 "proc"                  { TICODE (ICODE_PROC); }
 "eproc"                 { TICODE (ICODE_EPROC); }
 "ret"                   { TICODE (ICODE_RET); }
+"defvar"                { TICODE (ICODE_DEFVAR); }
 #"fixed"                 { TICODE (ICODE_FIXED); }
 #"data"                  { TICODE (ICODE_DATA); }
 #"xdata"                 { TICODE (ICODE_XDATA); }
