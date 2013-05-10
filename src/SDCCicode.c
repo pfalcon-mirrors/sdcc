@@ -575,6 +575,26 @@ printiCChain (iCode * icChain, FILE * of)
   fflush (of);
 }
 
+/*-----------------------------------------------------------------*/
+/* getiCodeSym - return existing iCode symbol or allocate new      */
+/*-----------------------------------------------------------------*/
+symbol *
+getiCodeSym (bucket ** stab, symbol *sym, char *name)
+{
+  void *p = findSym (SymbolTab, NULL, name);
+  if (!p)
+    {
+      addSym (SymbolTab, sym, name, 0, 0, 0);
+      sym->key = ++operandKey;
+      printf("Didn't find %s in symtab, added\n", sym->name);
+      return sym;
+    }
+  else
+    {
+      printf("Found %s in symtab\n", name);
+      return p;
+    }
+}
 
 /*-----------------------------------------------------------------*/
 /* newOperand - allocate, init & return a new iCode                */
