@@ -233,6 +233,7 @@ icode_endproc
           codeOutBuf = &code->oBuf;
 
           eBBlockFromiCode (all);
+          cleanUpLevel(SymbolTab, 0);
         }
    ;
 
