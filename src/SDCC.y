@@ -109,6 +109,10 @@ bool uselessDecl = TRUE;
 /* Grammar type dispatch tokens */
 %token PARSE_C PARSE_ICODE
 
+// iCode statements
+%token ICODE_PROC ICODE_EPROC ICODE_RET
+// iCode storage classes
+%token ICODE_FIXED ICODE_DATA ICODE_XDATA ICODE_LITERAL ICODE_ADDRSPACE
 
 %type <yyint> Interrupt_storage
 %type <sym> identifier declarator declarator2 declarator3 enumerator_list enumerator
@@ -139,6 +143,10 @@ bool uselessDecl = TRUE;
 %type <ilist> initializer initializer_list
 %type <yyint> unary_operator assignment_operator struct_or_union
 %type <yystr> asm_string_literal
+%type <oper> icode_typed_value icode_typed_ident icode_typed_const
+%type <sym> icode_label icode_entry_label icode_return_label icode_identifier
+%type <yystr> icode_addr_space
+%type <yyint> icode_binop
 
 %start file_type_dispatch
 
@@ -152,9 +160,177 @@ file_type_dispatch
 /*
  *  iCode Grammar
  */
+
 icode_program
-   :
+   : icode_program icode_func
+   |
    ;
+
+icode_func
+   : icode_entry_label icode_proc icode_statement_list icode_return_label icode_endproc
+   ;
+
+icode_entry_label
+   : icode_label
+        {
+          entryLabel = $$;
+        }
+   ;
+
+icode_return_label
+   : icode_label
+        {
+          returnLabel = $$;
+        }
+   ;
+
+
+icode_label
+   : identifier ':'
+        {
+            $1->key = labelKey++;
+            geniCodeLabel ($1);
+            $$ = $1;
+        }
+   ;
+
+icode_proc
+   : ICODE_PROC icode_typed_value
+        {
+          iCode *ic;
+          ic = newiCode (FUNCTION, $2, NULL);
+          ADDTOCHAIN (ic);
+          PICC(ic);
+        }
+   ;
+
+icode_endproc
+   : ICODE_EPROC icode_typed_value
+        {
+          iCode *ic, *all;
+          ic = newiCode (ENDFUNCTION, $2, NULL);
+          ADDTOCHAIN (ic);
+          PICC(ic);
+          printf("------------\n");
+          all = reverseiCChain ();
+          PICC(all);
+//          createFunctionFromiCode(all);
+          GcurMemmap = code;
+          codeOutBuf = &code->oBuf;
+
+          eBBlockFromiCode (all);
+        }
+   ;
+
+icode_statement_list
+   : icode_statement_list icode_statement
+   |
+   ;
+
+icode_statement
+   : icode_ret
+   | icode_label
+   | icode_binary
+   ;
+
+icode_ret
+   : ICODE_RET icode_typed_value
+        {
+          geniCodeReturn ($2);
+        }
+   ;
+
+icode_binop
+   : '+'    { $$ = '+';}
+   | '-'    { $$ = '-';}
+   | '*'    { $$ = '*';}
+   | '&'    { $$ = BITWISEAND;}
+   | '|'    { $$ = '|';}
+   | '^'    { $$ = '^';}
+   | RIGHT_OP { $$ = RIGHT_OP;}
+   ;
+
+icode_binary
+   : icode_typed_ident '=' icode_typed_value icode_binop icode_typed_value
+        {
+          iCode *ic;
+          printf("Parsed binop: %c\n", $4);
+          ic = newiCode ($4, $3, $5);
+          IC_RESULT (ic) = $1;
+          ADDTOCHAIN (ic);
+        }
+   ;
+
+icode_typed_value
+   : icode_typed_const
+   | icode_typed_ident
+   ;
+
+icode_typed_const
+   : CONSTANT '{' type_name icode_storage_class '}'
+        {
+          $1->type = $3;
+          // Reset storage class back to literal
+          SPEC_SCLS ($1->type) = S_LITERAL;
+// Setting etype overrwites actual constant value, etc.
+//          $1->etype = getSpec ($1->type);
+          $$ = operandFromValue($1);
+        }
+   ;
+
+icode_typed_ident
+   : icode_identifier '{' type_name icode_storage_class icode_addr_space '}'
+        {
+//          strncpyz ($3->name, $1->name, sizeof ($3->name));
+          strncpyz ($1->rname, $1->name, SDCC_NAME_MAX);
+          // TODO: use setOperandType ?
+          $1->type = $3;
+          $1->etype = getSpec ($1->type);
+          if (!strncmp($1->name, "iTemp", 5))
+            $1->isitmp = 1;
+
+#if 0
+          // Hack to convert ->rname back to ->name
+          // - didn't have effect
+          char *name = $1->name;
+          if (*name == '_') name++;
+          addSym (SymbolTab, $1, name, 0, 0, 0);
+#endif
+          $$ = operandFromSymbolSimple($1);
+          if ($5) {
+            SPEC_OCLS ($1->etype) = getMapByName($5);
+          }
+          if (!SPEC_OCLS ($1->etype)) {
+              if (!defaultOClass ($1))
+                {
+                    printf("Could not assign default oclass for: %s, setting to data\n", $1->name);
+                    SPEC_OCLS ($1->etype) = data;
+                }
+          }
+          printf("Got icode_typed_ident (input addrspace=%s): ", $5);
+          printOperand($$, NULL);
+        }
+   ;
+
+icode_identifier
+   : IDENTIFIER   { symbol *n = newSymbol ($1, NestLevel); $$ = getiCodeSym (SymbolTab, n, $1); }
+   ;
+
+icode_storage_class
+   : IDENTIFIER
+   ;
+
+icode_addr_space
+   : ICODE_ADDRSPACE '=' IDENTIFIER
+        {
+            $$ = $3;
+        }
+   |
+        {
+            $$ = "";
+        }
+   ;
+
 
 /*
  *  C Grammar

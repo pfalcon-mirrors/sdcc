@@ -52,6 +52,9 @@ HASH    (#|%:)
 
 #define TKEYWORD99(token) return (options.std_c99 ? token : check_type())
 
+#define TICODE(token) return (input_icode ? token :\
+                                check_type())
+
 int column = 0;         /* current column */
 
 /* global definitions */
@@ -182,6 +185,15 @@ static void checkCurrFile (const char *s);
 "__addressmod"          { count (); return ADDRESSMOD; }
 "_Static_assert"        { count (); return STATIC_ASSERT; }
 "_Alignas"              { count (); return ALIGNAS; }
+"proc"                  { TICODE (ICODE_PROC); }
+"eproc"                 { TICODE (ICODE_EPROC); }
+"ret"                   { TICODE (ICODE_RET); }
+#"fixed"                 { TICODE (ICODE_FIXED); }
+#"data"                  { TICODE (ICODE_DATA); }
+#"xdata"                 { TICODE (ICODE_XDATA); }
+#"literal"               { TICODE (ICODE_LITERAL); }
+"as"                    { TICODE (ICODE_ADDRSPACE); }
+
 {L}({L}|{D})*           {
   if (!options.dollars_in_ident && strchr (yytext, '$'))
     {
