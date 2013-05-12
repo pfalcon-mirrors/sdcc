@@ -260,6 +260,8 @@ icode_statement
    | icode_if
    | icode_label_def
    | icode_assign
+   | icode_recv
+   | icode_deref
    | icode_unary
    | icode_binary
    ;
@@ -301,7 +303,7 @@ icode_assign
    ;
 
 icode_unop
-   : ICODE_RECV    { $$ = RECEIVE; }
+   : '~'    { $$ = '~'; }
    ;
 
 icode_unary
@@ -311,8 +313,29 @@ icode_unary
           printf("Parsed unop: %c\n", $3);
           ic = newiCode ($3, $4, NULL);
           IC_RESULT (ic) = $1;
-          if (ic->op == RECEIVE)
-            ic->argreg = 1;
+          ADDTOCHAIN (ic);
+        }
+   ;
+
+icode_recv
+   : icode_typed_ident '=' ICODE_RECV icode_typed_value '{' identifier '=' CONSTANT '}'
+        {
+          iCode *ic;
+          ic = newiCode (RECEIVE, $4, NULL);
+          IC_RESULT (ic) = $1;
+          ic->argreg = ulFromVal($8);
+          ADDTOCHAIN (ic);
+        }
+   ;
+
+icode_deref
+   : icode_typed_ident '=' '@' '[' icode_typed_value '+' icode_typed_value ']'
+        {
+          iCode *ic;
+          ic = newiCode (GET_VALUE_AT_ADDRESS, $5, $7);
+          IC_RESULT (ic) = $1;
+          printf("Deref: ");
+          piCode(ic, NULL);
           ADDTOCHAIN (ic);
         }
    ;
