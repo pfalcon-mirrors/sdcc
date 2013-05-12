@@ -251,6 +251,7 @@ icode_statement_list
 icode_statement
    : icode_ret
    | icode_goto
+   | icode_if
    | icode_label_def
    | icode_binary
    ;
@@ -259,6 +260,18 @@ icode_goto
    : GOTO icode_label
         {
           geniCodeGoto ($2);
+        }
+   ;
+
+icode_if
+   : IF icode_typed_value icode_binop CONSTANT GOTO icode_label
+        {
+          iCode *ic;
+          if ($3 == EQ_OP)
+            ic = newiCodeCondition ($2, NULL, $6);
+          else
+            ic = newiCodeCondition ($2, $6, NULL);
+          ADDTOCHAIN (ic);
         }
    ;
 
