@@ -468,18 +468,26 @@ PRINTFUNC (picAssign)
   dbuf_append_char (dbuf, '\n');
 }
 
-PRINTFUNC (picLabel)
+void printLabel(symbol *label, struct dbuf_s *dbuf)
 {
   if (dumpiCodeExternalRepr)
-    dbuf_printf (dbuf, "%s:\n", IC_LABEL (ic)->name);
+    dbuf_printf (dbuf, "%s", label->name);
   else
-    dbuf_printf (dbuf, " %s($%d) :\n", IC_LABEL (ic)->name, IC_LABEL (ic)->key);
+    dbuf_printf (dbuf, " %s($%d)", label->name, label->key);
+}
+
+PRINTFUNC (picLabel)
+{
+  printLabel(IC_LABEL (ic), dbuf);
+  dbuf_printf (dbuf, ":\n");
 }
 
 PRINTFUNC (picGoto)
 {
   dbuf_append_char (dbuf, '\t');
-  dbuf_printf (dbuf, " goto %s($%d)\n", IC_LABEL (ic)->name, IC_LABEL (ic)->key);
+  dbuf_printf (dbuf, " goto ");
+  printLabel(IC_LABEL (ic), dbuf);
+  dbuf_append_char (dbuf, '\n');
 }
 
 PRINTFUNC (picIfx)
@@ -489,10 +497,15 @@ PRINTFUNC (picIfx)
   dbuf_printOperand (IC_COND (ic), dbuf);
 
   if (!IC_TRUE (ic))
-    dbuf_printf (dbuf, " == 0 goto %s($%d)\n", IC_FALSE (ic)->name, IC_FALSE (ic)->key);
+    {
+      dbuf_printf (dbuf, " == 0 goto ");
+      printLabel(IC_FALSE (ic), dbuf);
+      dbuf_append_char (dbuf, '\n');
+    }
   else
     {
-      dbuf_printf (dbuf, " != 0 goto %s($%d)", IC_TRUE (ic)->name, IC_TRUE (ic)->key);
+      dbuf_printf (dbuf, " != 0 goto ");
+      printLabel(IC_TRUE (ic), dbuf);
       if (IC_FALSE (ic))
         dbuf_printf (dbuf, "; zzgoto %s\n", IC_FALSE (ic)->name);
       dbuf_append_char (dbuf, '\n');
