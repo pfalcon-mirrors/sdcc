@@ -110,7 +110,7 @@ bool uselessDecl = TRUE;
 %token PARSE_C PARSE_ICODE
 
 // iCode statements
-%token ICODE_PROC ICODE_EPROC ICODE_RET
+%token ICODE_PROC ICODE_EPROC ICODE_RET ICODE_RECV
 %token ICODE_DEFVAR
 // iCode storage classes
 %token ICODE_FIXED ICODE_DATA ICODE_XDATA ICODE_LITERAL ICODE_ADDRSPACE ICODE_ASSIGN
@@ -147,7 +147,7 @@ bool uselessDecl = TRUE;
 %type <oper> icode_typed_value icode_typed_ident icode_typed_const
 %type <sym> icode_label icode_label_def icode_entry_label icode_return_label icode_identifier
 %type <yystr> icode_addr_space
-%type <yyint> icode_binop
+%type <yyint> icode_binop icode_unop
 
 %start file_type_dispatch
 
@@ -258,6 +258,7 @@ icode_statement
    | icode_if
    | icode_label_def
    | icode_assign
+   | icode_unary
    | icode_binary
    ;
 
@@ -293,6 +294,23 @@ icode_assign
           iCode *ic;
           ic = newiCode ('=', NULL, $3);
           IC_RESULT (ic) = $1;
+          ADDTOCHAIN (ic);
+        }
+   ;
+
+icode_unop
+   : ICODE_RECV    { $$ = RECEIVE; }
+   ;
+
+icode_unary
+   : icode_typed_ident '=' icode_unop icode_typed_value
+        {
+          iCode *ic;
+          printf("Parsed unop: %c\n", $3);
+          ic = newiCode ($3, $4, NULL);
+          IC_RESULT (ic) = $1;
+          if (ic->op == RECEIVE)
+            ic->argreg = 1;
           ADDTOCHAIN (ic);
         }
    ;

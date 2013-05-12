@@ -194,6 +194,8 @@ static void checkCurrFile (const char *s);
 #"xdata"                 { TICODE (ICODE_XDATA); }
 #"literal"               { TICODE (ICODE_LITERAL); }
 "as"                    { TICODE (ICODE_ADDRSPACE); }
+":="                    { TICODE (ICODE_ASSIGN); }
+"recv"                    { TICODE (ICODE_RECV); }
 
 {L}({L}|{D})*           {
   if (!options.dollars_in_ident && strchr (yytext, '$'))
