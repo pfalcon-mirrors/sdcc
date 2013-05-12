@@ -113,7 +113,7 @@ bool uselessDecl = TRUE;
 %token ICODE_PROC ICODE_EPROC ICODE_RET
 %token ICODE_DEFVAR
 // iCode storage classes
-%token ICODE_FIXED ICODE_DATA ICODE_XDATA ICODE_LITERAL ICODE_ADDRSPACE
+%token ICODE_FIXED ICODE_DATA ICODE_XDATA ICODE_LITERAL ICODE_ADDRSPACE ICODE_ASSIGN
 
 %type <yyint> Interrupt_storage
 %type <sym> identifier declarator declarator2 declarator3 enumerator_list enumerator
@@ -253,6 +253,7 @@ icode_statement
    | icode_goto
    | icode_if
    | icode_label_def
+   | icode_assign
    | icode_binary
    ;
 
@@ -279,6 +280,16 @@ icode_ret
    : ICODE_RET icode_typed_value
         {
           geniCodeReturn ($2);
+        }
+   ;
+
+icode_assign
+   : icode_typed_ident ICODE_ASSIGN icode_typed_value
+        {
+          iCode *ic;
+          ic = newiCode ('=', NULL, $3);
+          IC_RESULT (ic) = $1;
+          ADDTOCHAIN (ic);
         }
    ;
 
