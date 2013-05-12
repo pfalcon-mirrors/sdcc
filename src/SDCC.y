@@ -147,7 +147,9 @@ bool uselessDecl = TRUE;
 %type <oper> icode_typed_value icode_typed_ident icode_typed_const
 %type <sym> icode_label icode_label_def icode_entry_label icode_return_label icode_identifier
 %type <yystr> icode_addr_space
+%type <yychar> icode_ic_flag
 %type <yyint> icode_binop icode_unop
+%type <yyint> icode_ic_flag_list icode_ic_flag_spec
 
 %start file_type_dispatch
 
@@ -345,23 +347,23 @@ icode_typed_value
    ;
 
 icode_typed_const
-   : CONSTANT '{' type_name icode_storage_class '}'
+//   : CONSTANT '{' type_name icode_storage_class '}'
+   : CONSTANT '{' type_name '}'
         {
-          $1->type = $3;
-          // Reset storage class back to literal
-          SPEC_SCLS ($1->type) = S_LITERAL;
-// Setting etype overrwites actual constant value, etc.
-//          $1->etype = getSpec ($1->type);
-          $$ = operandFromValue($1);
+          //printf("Parsed value: "); printVal($1); printf("\n");
+          value *casted = valRecastLitVal ($3, $1);
+          $$ = operandFromValue(casted);
+          printf("Op value: "); printVal(OP_VALUE($$)); printf("\n");
         }
    ;
 
 icode_typed_ident
-   : icode_identifier '{' type_name icode_storage_class icode_addr_space '}'
+//   : icode_identifier '{' type_name icode_storage_class icode_addr_space '}'
+   : icode_identifier icode_ic_flag_spec '{' type_name icode_addr_space '}'
         {
           SNPRINTF ($1->rname, sizeof ($1->rname), "_%s", $1->name);
           // TODO: use setOperandType ?
-          $1->type = $3;
+          $1->type = $4;
           $1->etype = getSpec ($1->type);
           if (!strncmp($1->name, "iTemp", 5))
             $1->isitmp = 1;
@@ -377,6 +379,7 @@ icode_typed_ident
           if ($5) {
             SPEC_OCLS ($1->etype) = getMapByName($5);
           }
+#if 0 // for exact iCode match in roundtrip
           if (!SPEC_OCLS ($1->etype)) {
               if (!defaultOClass ($1))
                 {
@@ -384,6 +387,18 @@ icode_typed_ident
                     SPEC_OCLS ($1->etype) = data;
                 }
           }
+#endif
+printf("FLAGS: %x\n", $2);
+          if ($2 & IC_FLAG_REF)
+            $1->isref = 1;
+          if ($2 & IC_FLAG_ADDR)
+            $$->isaddr = 1;
+          if ($2 & IC_FLAG_PTR)
+            $$->isPtr = 1;
+          if ($2 & IC_FLAG_GLB)
+            $$->isGlobal = 1;
+
+
           printf("Got icode_typed_ident (input addrspace=%s): ", $5);
           printOperand($$, NULL);
         }
@@ -394,6 +409,33 @@ icode_identifier
    ;
 
 icode_storage_class
+   : IDENTIFIER
+   ;
+
+icode_ic_flag_spec
+   : '<' icode_ic_flag_list '>'
+        {
+            $$ = $2;
+        }
+   |    { $$ = 0; }
+   ;
+
+icode_ic_flag_list
+   : icode_ic_flag_list icode_ic_flag
+        {
+            if (!strcmp($2, "ref"))
+              $$ |= IC_FLAG_REF;
+            else if (!strcmp($2, "glb"))
+              $$ |= IC_FLAG_GLB;
+            else if (!strcmp($2, "addr"))
+              $$ |= IC_FLAG_ADDR;
+            else if (!strcmp($2, "ptr"))
+              $$ |= IC_FLAG_PTR;
+        }
+   |    { $$ = 0; }
+   ;
+
+icode_ic_flag
    : IDENTIFIER
    ;
 
