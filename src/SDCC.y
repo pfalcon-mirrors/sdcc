@@ -277,6 +277,9 @@ icode_binop
    | '|'    { $$ = '|';}
    | '^'    { $$ = '^';}
    | RIGHT_OP { $$ = RIGHT_OP;}
+   | LEFT_OP { $$ = LEFT_OP;}
+   | EQ_OP { $$ = EQ_OP;}
+   | NE_OP { $$ = NE_OP;}
    ;
 
 icode_binary
