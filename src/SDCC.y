@@ -145,7 +145,7 @@ bool uselessDecl = TRUE;
 %type <yyint> unary_operator assignment_operator struct_or_union
 %type <yystr> asm_string_literal
 %type <oper> icode_typed_value icode_typed_ident icode_typed_const
-%type <sym> icode_label icode_entry_label icode_return_label icode_identifier
+%type <sym> icode_label icode_label_def icode_entry_label icode_return_label icode_identifier
 %type <yystr> icode_addr_space
 %type <yyint> icode_binop
 
@@ -184,27 +184,31 @@ icode_func
    ;
 
 icode_entry_label
-   : icode_label
+   : icode_label_def
         {
           entryLabel = $$;
         }
    ;
 
 icode_return_label
-   : icode_label
+   : icode_label_def
         {
           returnLabel = $$;
         }
    ;
 
 
-icode_label
-   : identifier ':'
+icode_label_def
+   : icode_label ':'
         {
             $1->key = labelKey++;
             geniCodeLabel ($1);
             $$ = $1;
         }
+   ;
+
+icode_label
+   : identifier
    ;
 
 icode_proc
@@ -246,7 +250,7 @@ icode_statement_list
 
 icode_statement
    : icode_ret
-   | icode_label
+   | icode_label_def
    | icode_binary
    ;
 
