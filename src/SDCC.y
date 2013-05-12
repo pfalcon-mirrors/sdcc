@@ -250,8 +250,16 @@ icode_statement_list
 
 icode_statement
    : icode_ret
+   | icode_goto
    | icode_label_def
    | icode_binary
+   ;
+
+icode_goto
+   : GOTO icode_label
+        {
+          geniCodeGoto ($2);
+        }
    ;
 
 icode_ret
