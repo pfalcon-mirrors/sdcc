@@ -621,6 +621,27 @@ getiCodeSym (bucket ** stab, symbol *sym, char *name)
 }
 
 /*-----------------------------------------------------------------*/
+/* getiCodeLabel - return existing iCode label or allocate new     */
+/*-----------------------------------------------------------------*/
+symbol *
+getiCodeLabel (symbol *sym, char *name)
+{
+  void *p = findSym (LabelTab, NULL, name);
+  if (!p)
+    {
+      addSym (LabelTab, sym, name, 0, 0, 0);
+      sym->key = ++labelKey;
+      printf("Didn't find %s in labeltab, added\n", sym->name);
+      return sym;
+    }
+  else
+    {
+      printf("Found %s in labeltab\n", name);
+      return p;
+    }
+}
+
+/*-----------------------------------------------------------------*/
 /* newOperand - allocate, init & return a new iCode                */
 /*-----------------------------------------------------------------*/
 operand *
