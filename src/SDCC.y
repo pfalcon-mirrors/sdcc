@@ -201,7 +201,7 @@ icode_return_label
 icode_label_def
    : icode_label ':'
         {
-            $1->key = labelKey++;
+//            $1->key = labelKey++;
             geniCodeLabel ($1);
             $$ = $1;
         }
@@ -209,6 +209,9 @@ icode_label_def
 
 icode_label
    : identifier
+        {
+          $$ = getiCodeLabel ($1, $1->name);
+        }
    ;
 
 icode_proc
@@ -240,6 +243,7 @@ icode_endproc
 
           eBBlockFromiCode (all);
           cleanUpLevel(SymbolTab, 0);
+          cleanUpLevel(LabelTab, 0);
         }
    ;
 
