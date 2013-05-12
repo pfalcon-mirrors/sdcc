@@ -3343,8 +3343,6 @@ dbuf_printTypeChain (sym_link * start, struct dbuf_s *dbuf)
 
   /* Print the chain as it is written in the source: */
   /* start with the last entry.                      */
-  /* However, the storage class at the end of the    */
-  /* chain really applies to the first in the chain! */
 
   for (type = start; type && type->next; type = type->next)
     ;
@@ -3352,6 +3350,61 @@ dbuf_printTypeChain (sym_link * start, struct dbuf_s *dbuf)
     scls = SPEC_SCLS (type);
   else
     scls = 0;
+
+      if (1)
+        {
+          switch (scls)
+            {
+            case S_FIXED:
+              dbuf_append_str (dbuf, "/*fixed*/ ");
+              break;
+            case S_AUTO:
+              dbuf_append_str (dbuf, "auto ");
+              break;
+            case S_REGISTER:
+              dbuf_append_str (dbuf, "register ");
+              break;
+            case S_DATA:
+              dbuf_append_str (dbuf, "data ");
+              break;
+            case S_XDATA:
+              dbuf_append_str (dbuf, "xdata ");
+              break;
+            case S_SFR:
+              dbuf_append_str (dbuf, "sfr ");
+              break;
+            case S_SBIT:
+              dbuf_append_str (dbuf, "sbit ");
+              break;
+            case S_CODE:
+              dbuf_append_str (dbuf, "code ");
+              break;
+            case S_IDATA:
+              dbuf_append_str (dbuf, "idata ");
+              break;
+            case S_PDATA:
+              dbuf_append_str (dbuf, "pdata ");
+              break;
+            case S_LITERAL:
+              dbuf_append_str (dbuf, "/*literal*/ ");
+              break;
+            case S_STACK:
+              dbuf_append_str (dbuf, "stack ");
+              break;
+            case S_XSTACK:
+              dbuf_append_str (dbuf, "xstack ");
+              break;
+            case S_BIT:
+              dbuf_append_str (dbuf, "bit ");
+              break;
+            case S_EEPROM:
+              dbuf_append_str (dbuf, "eeprom ");
+              break;
+            default:
+              break;
+            }
+        }
+
   while (type)
     {
       if (IS_DECL (type))
@@ -3499,59 +3552,6 @@ dbuf_printTypeChain (sym_link * start, struct dbuf_s *dbuf)
 
             default:
               dbuf_append_str (dbuf, "unknown type");
-              break;
-            }
-        }
-      if (type == start)
-        {
-          switch (scls)
-            {
-            case S_FIXED:
-              dbuf_append_str (dbuf, " fixed");
-              break;
-            case S_AUTO:
-              dbuf_append_str (dbuf, " auto");
-              break;
-            case S_REGISTER:
-              dbuf_append_str (dbuf, " register");
-              break;
-            case S_DATA:
-              dbuf_append_str (dbuf, " data");
-              break;
-            case S_XDATA:
-              dbuf_append_str (dbuf, " xdata");
-              break;
-            case S_SFR:
-              dbuf_append_str (dbuf, " sfr");
-              break;
-            case S_SBIT:
-              dbuf_append_str (dbuf, " sbit");
-              break;
-            case S_CODE:
-              dbuf_append_str (dbuf, " code");
-              break;
-            case S_IDATA:
-              dbuf_append_str (dbuf, " idata");
-              break;
-            case S_PDATA:
-              dbuf_append_str (dbuf, " pdata");
-              break;
-            case S_LITERAL:
-              dbuf_append_str (dbuf, " literal");
-              break;
-            case S_STACK:
-              dbuf_append_str (dbuf, " stack");
-              break;
-            case S_XSTACK:
-              dbuf_append_str (dbuf, " xstack");
-              break;
-            case S_BIT:
-              dbuf_append_str (dbuf, " bit");
-              break;
-            case S_EEPROM:
-              dbuf_append_str (dbuf, " eeprom");
-              break;
-            default:
               break;
             }
         }
