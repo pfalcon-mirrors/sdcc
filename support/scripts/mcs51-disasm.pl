@@ -42,7 +42,7 @@
 
 use strict;
 use warnings;
-use 5.12.0;                     # when (regex)
+use 5.40.0;                     # when (regex)
 
 use constant FALSE	=> 0;
 use constant TRUE	=> 1;
@@ -395,7 +395,7 @@ sub _defined($)
 sub define($)
   {
   my ($Name) = ($_[0] =~ /^(\S+)/o);
-  my $Body = ${^POSTMATCH};
+  my $Body = ${^POSTMATCH} // '';
 
   $Body =~ s/^\s+//o;
 
@@ -1385,9 +1385,9 @@ sub read_name_list()
 
     $line = $_;
 
-    given ($state)
+    if ($state)      # given
       {
-      when (NAMES_BIT)
+      if (NAMES_BIT)      # when
 	{
 	if ($line =~ /^0x([[:xdigit:]]+)\s*:\s*(\S+)$/io)
 	  {
@@ -1395,7 +1395,7 @@ sub read_name_list()
 	  }
 	}
 
-      when (NAMES_RAM)
+      elsif (NAMES_RAM)      # when
 	{
 	if ($line =~ /^0x([[:xdigit:]]+)\s*:\s*(\S+)$/io)
 	  {
@@ -1403,7 +1403,7 @@ sub read_name_list()
 	  }
 	}
 
-      when (NAMES_IRAM)
+      elsif (NAMES_IRAM)      # when
 	{
 	if ($line =~ /^0x([[:xdigit:]]+)\s*:\s*(\S+)$/io)
 	  {
@@ -1411,7 +1411,7 @@ sub read_name_list()
 	  }
 	}
 
-      when (NAMES_XRAM)
+      elsif (NAMES_XRAM)      # when
 	{
 	if ($line =~ /^0x([[:xdigit:]]+)\s*:\s*(\S+)$/io)
 	  {
@@ -1419,7 +1419,7 @@ sub read_name_list()
 	  }
 	}
 
-      when (NAMES_ROM)
+      elsif (NAMES_ROM)      # when
 	{
 	if ($line =~ /^0x([[:xdigit:]]+)\s*:\s*(\S+)$/io)
 	  {
@@ -6022,9 +6022,9 @@ for (my $i = 0; $i < @ARGV; )
   {
   my $opt = $ARGV[$i++];
 
-  given ($opt)
+  if ($opt)      # given
     {
-    when (/^-(r|-rom-size)$/o)
+    if ($opt =~ /^-(r|-rom-size)$/o)      # when
       {
       param_exist($opt, $i);
       $rom_size = str2int($ARGV[$i++]);
@@ -6041,7 +6041,7 @@ for (my $i = 0; $i < @ARGV; )
 	}
       }
 
-    when (/^--const-area$/o)
+    elsif ($opt =~ /^--const-area$/o)      # when
       {
       my ($start, $end);
 
@@ -6067,56 +6067,56 @@ for (my $i = 0; $i < @ARGV; )
       add_const_area($start, $end) if ($start < $end);
       } # when (/^--const-area$/o)
 
-    when (/^-(hc|-hex-constant)$/o)
+    elsif ($opt =~ /^-(hc|-hex-constant)$/o)      # when
       {
       $hex_constant = TRUE;
       }
 
-    when (/^-(I|-include)$/o)
+    elsif ($opt =~ /^-(I|-include)$/o)      # when
       {
       param_exist($opt, $i);
       $include_path = $ARGV[$i++];
       }
 
-    when (/^-(M|-mcu)$/o)
+    elsif ($opt =~ /^-(M|-mcu)$/o)      # when
       {
       param_exist($opt, $i);
       $header_file = $ARGV[$i++];
       }
 
-    when (/^--map-file$/o)
+    elsif ($opt =~ /^--map-file$/o)      # when
       {
       param_exist($opt, $i);
       $map_file = $ARGV[$i++];
       }
 
-    when (/^-(as|-assembly-source)$/o)
+    elsif ($opt =~ /^-(as|-assembly-source)$/o)      # when
       {
       $gen_assembly_code = TRUE;
       }
 
-    when (/^-(rj|-recognize-jump-tables)$/o)
+    elsif ($opt =~ /^-(rj|-recognize-jump-tables)$/o)      # when
       {
       $recognize_jump_tables = TRUE;
       }
 
-    when (/^-(fl|-find-lost-labels)$/o)
+    elsif ($opt =~ /^-(fl|-find-lost-labels)$/o)      # when
       {
       $find_lost_labels = TRUE;
       }
 
-    when (/^--name-list$/o)
+    elsif ($opt =~ /^--name-list$/o)      # when
       {
       param_exist($opt, $i);
       $name_list = $ARGV[$i++];
       }
 
-    when (/^-(ne|-no-explanations)$/o)
+    elsif ($opt =~ /^-(ne|-no-explanations)$/o)      # when
       {
       $no_explanations = TRUE;
       }
 
-    when (/^-(v|-verbose)$/o)
+    elsif ($opt =~ /^-(v|-verbose)$/o)      # when
       {
       param_exist($opt, $i);
       $verbose = int($ARGV[$i++]);
@@ -6124,23 +6124,23 @@ for (my $i = 0; $i < @ARGV; )
       $verbose = 10 if ($verbose > 10);
       }
 
-    when (/^-(h|-help)$/o)
+    elsif ($opt =~ /^-(h|-help)$/o)      # when
       {
       usage();
       exit(0);
       }
 
-    default
+    else     # default
       {
       if ($hex_file eq '')
-	{
-	$hex_file = $opt;
-	}
+	    {
+	    $hex_file = $opt;
+	    }
       else
-	{
-	print STDERR "$PROGRAM: We already have the source file name: $hex_file.\n";
-	exit(1);
-	}
+	    {
+	    print STDERR "$PROGRAM: We already have the source file name: $hex_file.\n";
+	    exit(1);
+	    }
       }
     } # given ($opt)
   } # for (my $i = 0; $i < @ARGV; )
